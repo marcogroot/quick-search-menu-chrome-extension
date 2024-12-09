@@ -1,9 +1,6 @@
-console.log("Testing 1");
-
 var inputs, index;
 var colonIndex = -1;
 var emojiMenuUp = false;
-var emojiMenu = null;
 
 inputs = document.getElementsByTagName("input");
 for (index = 0; index < inputs.length; ++index) {
@@ -16,9 +13,9 @@ for (index = 0; index < inputs.length; ++index) {
   doc.addEventListener("input", function (e) {
     handleInput(e, doc);
   });
-  doc.addEventListener("blur", () => {
-    closeEmojiMenu();
-  });
+  // doc.addEventListener("blur", () => {
+  //   closeEmojiMenu();
+  // });
 }
 
 function handleInput(event, doc) {
@@ -33,7 +30,7 @@ function handleInput(event, doc) {
   } else if (textContent[colonIndex] != ":") {
     closeEmojiMenu();
   } else {
-    let emojiTextIndex = colonIndex;
+    let emojiTextIndex = colonIndex + 1;
     let emojiText = "";
     while (
       emojiTextIndex < textContent.length &&
@@ -44,21 +41,20 @@ function handleInput(event, doc) {
       emojiTextIndex++;
     }
 
-    console.log(`Searching for emoji ${emojiText}`);
-    emojiMenu;
+    let newEmojiMenu = createEmojiMenu(doc, emojiText);
+    existingMenu = newEmojiMenu;
   }
 }
 
 function createEmojiMenu(doc, emojiText) {
   console.log("Open emoji menu");
   emojiMenuUp = true;
-  let div = emojiSearchMenu(doc);
-  console.log(div);
+  let div = emojiSearchMenu(doc, emojiText);
+
+  [...document.getElementsByClassName("emoji-search-box")].map(
+    (n) => n && n.remove(),
+  );
   doc.insertAdjacentElement("beforebegin", div);
-  // if (emojiMenu === null) {
-  // } else {
-  //   emojiMenu = div;
-  // }
 }
 
 function closeEmojiMenu() {
@@ -68,5 +64,4 @@ function closeEmojiMenu() {
     (n) => n && n.remove(),
   );
   colonIndex = -1;
-  emojiMenu = null;
 }
