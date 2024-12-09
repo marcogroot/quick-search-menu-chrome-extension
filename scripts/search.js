@@ -65,5 +65,6 @@ function createlistItemElement(text) {
   listItem.style.padding = "10px";
   listItem.style.marginBottom = "1px";
   listItem.innerText = text;
+  listItem.classList.add("emoji-search-box-result");
   return listItem;
 }
