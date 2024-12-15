@@ -12,7 +12,7 @@ let emojis = [
   "melting face - 🫠",
 ];
 
-function createEmojiSearchMenuHtml(element, emojiText, searchIndex) {
+function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   let div = document.createElement("div");
   let toolTip = createToolTipElement();
   div.appendChild(toolTip);
@@ -29,8 +29,8 @@ function createEmojiSearchMenuHtml(element, emojiText, searchIndex) {
       if (list.childElementCount >= 5) {
         break;
       }
+      count++;
     }
-    count++;
   }
 
   div.classList.add("emoji-search-box");

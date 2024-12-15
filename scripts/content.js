@@ -22,13 +22,17 @@ for (index = 0; index < inputs.length; ++index) {
   currentInput.addEventListener("input", function (e) {
     handleInputText(e.target.value, currentInput);
   });
-  currentInput.addEventListener("blur", handleBlurring);
 }
 
 function handleInputKeydownEvents(e, currentInput) {
   if (!emojiMenuUp) return;
-  else if (e.key === "ArrowDown") {
+  let searchResults = document.getElementsByClassName(
+    "emoji-search-box-result",
+  );
+  let searchSize = searchResults.length;
+  if (e.key === "ArrowDown") {
     searchIndex = 1;
+    searchIndex = Math.min(searchSize - 1, searchIndex);
     currentInput.blur();
     let emojiSearchBox = createEmojiMenu();
     emojiSearchBox.focus();
@@ -38,21 +42,7 @@ function handleInputKeydownEvents(e, currentInput) {
     let emojiSearchBox = createEmojiMenu();
     emojiSearchBox.focus();
   } else if (e.key === "Enter" && emojiMenuUp) {
-    e.preventDefault();
-  }
-}
-
-function handleBlurring() {
-  if (emojiMenuUp) {
-    let emojiSearchBox = getEmojiSearchBox();
-    console.log(document.activeElement != emojiSearchBox);
-    console.log(document.activeElement != currentInputBox);
-    if (
-      document.activeElement != emojiSearchBox &&
-      document.activeElement != currentInputBox
-    ) {
-      closeEmojiMenu();
-    }
+    handleEmojjiInsertion(e, searchResults);
   }
 }
 
@@ -85,13 +75,8 @@ function handleInputText(textContent, currentInputBoxElement) {
 
 function createEmojiMenu() {
   emojiMenuUp = true;
-  let emojiSearchMenu = createEmojiSearchMenuHtml(
-    currentInputBox,
-    emojiText,
-    searchIndex,
-  );
+  let emojiSearchMenu = createEmojiSearchMenuHtml(emojiText, searchIndex);
 
-  emojiSearchMenu.addEventListener("blur", handleBlurring);
   emojiSearchMenu.addEventListener("keydown", function (e) {
     if (!emojiMenuUp) return;
     let searchResults = document.getElementsByClassName(
@@ -108,24 +93,7 @@ function createEmojiMenu() {
       searchIndex--;
       searchIndex = Math.max(0, searchIndex);
     } else if (e.key === "Enter") {
-      e.preventDefault();
-      const chosenEmojiString = searchResults[searchIndex].textContent;
-      const chosenEmojiArray = Array.from(chosenEmojiString);
-      const chosenEmojiSize = chosenEmojiArray.length;
-      const chosenEmoji = chosenEmojiArray[chosenEmojiSize - 1];
-
-      const currentText = currentInputBox.value;
-
-      let left = currentText.substr(0, colonIndex);
-      if (colonIndex === 0) {
-        left = "";
-      }
-      let right = currentText.substr(colonIndex + 1 + emojiText.length);
-      const newText = left + chosenEmoji + right;
-      currentInputBox.value = newText;
-      closeEmojiMenu();
-      currentInputBox.focus();
-      return;
+      handleEmojjiInsertion(e, searchResults);
     } else {
       emojiSearchMenu.blur();
       currentInputBox.focus();
@@ -162,4 +130,25 @@ function closeEmojiMenu() {
 
 function getEmojiSearchBox() {
   return document.getElementsByClassName("emoji-search-box")[0];
+}
+
+function handleEmojjiInsertion(e, searchResults) {
+  e.preventDefault();
+  const chosenEmojiString = searchResults[searchIndex].textContent;
+  const chosenEmojiArray = Array.from(chosenEmojiString);
+  const chosenEmojiSize = chosenEmojiArray.length;
+  const chosenEmoji = chosenEmojiArray[chosenEmojiSize - 1];
+
+  const currentText = currentInputBox.value;
+
+  let left = currentText.substr(0, colonIndex);
+  if (colonIndex === 0) {
+    left = "";
+  }
+  let right = currentText.substr(colonIndex + 1 + emojiText.length);
+  const newText = left + chosenEmoji + right;
+  currentInputBox.value = newText;
+  closeEmojiMenu();
+  currentInputBox.focus();
+  return;
 }
