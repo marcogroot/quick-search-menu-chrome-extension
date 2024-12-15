@@ -12,7 +12,7 @@ let emojis = [
   "melting face - 🫠",
 ];
 
-function emojiSearchMenu(element, emojiText, index) {
+function createEmojiSearchMenuHtml(element, emojiText, searchIndex) {
   let div = document.createElement("div");
   let toolTip = createToolTipElement();
   div.appendChild(toolTip);
@@ -22,7 +22,7 @@ function emojiSearchMenu(element, emojiText, index) {
   for (const emoji of emojis) {
     if (emoji.includes(emojiText)) {
       let listItem = createlistItemElement(emoji);
-      if (count === index) {
+      if (count === searchIndex) {
         listItem.style.backgroundColor = "lavender";
       }
       list.appendChild(listItem);
