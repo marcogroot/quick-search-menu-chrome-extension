@@ -1,0 +1,13 @@
+if string starts and ends with colon then try to find result
+
+if enter pressed and no results close menu
+
+parse emojis from json file, let it be edited
+
+add overwrite to html to appear on top of everything
+
+appear on top or bottom of page dynamically
+
+add clickable emjoji search results
+
+Add option to disable the popup on the given website
