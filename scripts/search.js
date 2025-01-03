@@ -33,7 +33,9 @@ function createEmojiSearchMenuHtml(emojiText, searchIndex) {
     }
   }
 
+  div.style.all = "unset";
   div.classList.add("emoji-search-box");
+  div.style.zIndex = "100000";
   div.style.backgroundColor = "black";
   div.style.position = "relative";
   div.tabIndex = 0;

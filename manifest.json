@@ -12,9 +12,9 @@
   },
   "content_scripts": [
     {
-      "js": ["scripts/content.js", "scripts/search.js"],
-      "css": ["scripts/search.css"],
-      "matches": ["http://*/*", "https://*/*"]
+      "js": ["scripts/startup.js", "scripts/content.js", "scripts/search.js"],
+      "matches": ["http://*/*", "https://*/*"],
+      "run_at": "document_end"
     }
   ],
   "permissions": ["activeTab", "scripting"]
