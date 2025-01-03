@@ -6,4 +6,4 @@ setTimeout(() => {
   inputs = document.getElementsByTagName("input");
 
   runEmojiMenu(inputs, ariaTextBoxes);
-}, 3000);
+}, 100);

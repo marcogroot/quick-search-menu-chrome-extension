@@ -15,6 +15,7 @@ let emojis = [
 function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   let div = document.createElement("div");
   let toolTip = createToolTipElement();
+
   div.appendChild(toolTip);
   let list = document.createElement("ul");
 
@@ -33,14 +34,13 @@ function createEmojiSearchMenuHtml(emojiText, searchIndex) {
     }
   }
 
+  div.appendChild(list);
   div.style.all = "unset";
   div.classList.add("emoji-search-box");
   div.style.zIndex = "100000";
   div.style.backgroundColor = "black";
-  div.style.position = "relative";
   div.tabIndex = 0;
-
-  div.appendChild(list);
+  div.style.width = "200px";
 
   return div;
 }
