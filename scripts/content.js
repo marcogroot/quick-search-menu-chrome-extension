@@ -123,12 +123,16 @@ function runEmojiMenu(inputs, ariaInputs) {
     );
 
     const rect = currentInputBox.getBoundingClientRect();
-    console.log(rect.height);
-    emojiSearchMenu.style.top = rect.top + rect.height - 330 + "px"; // Position above
-    emojiSearchMenu.style.left = rect.left + "px"; // Align left edges
-    emojiSearchMenu.style.position = "fixed";
+    emojiSearchMenu.style.left = rect.left + "px";
 
     document.body.appendChild(emojiSearchMenu);
+    let emojiSearchMenuHeight = emojiSearchMenu.getBoundingClientRect().height;
+
+    if (isDivInTopHalf(currentInputBox)) {
+      emojiSearchMenu.style.top = rect.top + rect.height + "px";
+    } else {
+      emojiSearchMenu.style.top = rect.top - emojiSearchMenuHeight + "px";
+    }
     return emojiSearchMenu;
   }
 
@@ -183,4 +187,17 @@ function runEmojiMenu(inputs, ariaInputs) {
     currentInputBox.focus();
     return;
   }
+}
+
+function isDivInTopHalf(divElement) {
+  if (!divElement) {
+    return false;
+  }
+
+  const rect = divElement.getBoundingClientRect();
+  const viewportHeight =
+    window.innerHeight || document.documentElement.clientHeight;
+  const divCenterY = rect.top + rect.height / 2;
+
+  return divCenterY < viewportHeight / 2;
 }

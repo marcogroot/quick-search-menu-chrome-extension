@@ -1,6 +1,4 @@
 MUST DO:
-add overwrite to html to appear on top of everything
-appear on top or bottom of page dynamically
 if enter pressed and no results close menu
 parse emojis from json file, let it be edited
 Add option to disable the popup on the given website
@@ -9,3 +7,7 @@ add clickable emjoji search results
 MAYBE DO:
 if string starts and ends with colon then try to find result
 cancel if u do ": "
+
+DONE:
+add overwrite to html to appear on top of everything @03-01-2025-20:39
+appear on top or bottom of page dynamically @03-01-2025-20:39

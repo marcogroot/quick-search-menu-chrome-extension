@@ -41,6 +41,7 @@ function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   div.style.backgroundColor = "black";
   div.tabIndex = 0;
   div.style.width = "200px";
+  div.style.position = "fixed";
 
   return div;
 }
