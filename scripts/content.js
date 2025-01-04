@@ -1,8 +1,21 @@
-var inputs, index;
-var colonIndex = -1;
-var emojiMenuUp = false;
-var searchIndex = 0;
-var focusedInputBox;
+let searchSymbol = ":";
+
+chrome.storage.local.get("searchSymbol", function (data) {
+  if (chrome.runtime.lastError) {
+    console.error("Error getting storage:", chrome.runtime.lastError);
+  } else {
+    if (data.searchSymbol) {
+      searchSymbol = data.searchSymbol;
+      console.log("Search symbol is ", searchSymbol);
+    }
+  }
+});
+
+let inputs, index;
+let searchSymbolIndex = -1;
+let emojiMenuUp = false;
+let searchIndex = 0;
+let focusedInputBox;
 let emojiText = "";
 
 function runEmojiMenu(inputs, ariaInputs) {
@@ -72,22 +85,22 @@ function runEmojiMenu(inputs, ariaInputs) {
     focusedInputBox = currentInput;
 
     // if there is no menu
-    // They typed a colon -> open search menu
+    // They typed a search symbols -> open search menu
     // else -> exit out
-    if (colonIndex == -1) {
-      if (lastTyped != ":") return;
-      colonIndex = selectionStart - 1;
+    if (searchSymbolIndex == -1) {
+      if (lastTyped != searchSymbol) return;
+      searchSymbolIndex = selectionStart - 1;
       createEmojiMenu(currentInput, "");
       return;
     }
     // close menu if you start typing somewhere else;
-    if (textContent[colonIndex] != ":") {
+    if (textContent[searchSymbolIndex] != searchSymbol) {
       closeEmojiMenu();
       return;
     }
 
-    // TODO types two colons, if there is only 1 result then insert it, otherwise close
-    if (lastTyped == ":") {
+    // if they type two search symbols, if there is only 1 result then insert it, otherwise close
+    if (lastTyped == searchSymbol) {
       let exactEmoji = searchExactEmoji(emojiText);
       if (exactEmoji != null) {
         handleEmojiInsertion(exactEmoji, true);
@@ -98,13 +111,14 @@ function runEmojiMenu(inputs, ariaInputs) {
     }
 
     // If the user types colon followed by a space, just close the menu
-    if (lastTyped == " " && selectionStart - 2 == colonIndex) {
+    if (lastTyped == " " && selectionStart - 2 == searchSymbolIndex) {
       closeEmojiMenu();
       return;
     }
 
     // Else they are currently typing out an emoji
-    emojiText = textContent.substring(colonIndex + 1, selectionStart);
+    emojiText = textContent.substring(searchSymbolIndex + 1, selectionStart);
+    searchIndex = 0;
     let newEmojiMenu = createEmojiMenu();
     existingMenu = newEmojiMenu;
   }
@@ -135,8 +149,7 @@ function runEmojiMenu(inputs, ariaInputs) {
         focusedInputBox.focus();
       }
 
-      let searchResultListSize = searchResults.length;
-      for (index = 0; index < searchResultListSize; ++index) {
+      for (index = 0; index < searchSize; ++index) {
         let listItem = searchResults[index];
         if (searchIndex === index) {
           listItem.style.backgroundColor = "lavender";
@@ -170,7 +183,7 @@ function runEmojiMenu(inputs, ariaInputs) {
       (n) => n && n.remove(),
     );
     searchIndex = 0;
-    colonIndex = -1;
+    searchSymbolIndex = -1;
     emojiText = "";
   }
 
@@ -188,18 +201,21 @@ function runEmojiMenu(inputs, ariaInputs) {
   function handleEmojiInsertion(searchedEmoji, insertedWithColon) {
     let currentText = focusedInputBox.value;
 
-    let left = currentText.substr(0, colonIndex);
-    if (colonIndex === 0) {
+    let left = currentText.substr(0, searchSymbolIndex);
+    if (searchSymbolIndex === 0) {
       left = "";
     }
-    let rigth_start_index = colonIndex + 1;
+    let rigth_start_index = searchSymbolIndex + 1;
     if (insertedWithColon) {
       rigth_start_index += 1;
     }
     let right = currentText.substr(rigth_start_index + emojiText.length);
     const newText = left + searchedEmoji + right;
     focusedInputBox.value = newText;
-    focusedInputBox.setSelectionRange(colonIndex + 1, colonIndex + 1);
+    focusedInputBox.setSelectionRange(
+      searchSymbolIndex + searchedEmoji.length,
+      searchSymbolIndex + searchedEmoji.length,
+    );
     focusedInputBox.focus();
     closeEmojiMenu();
     return;

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Colon emoji",
-  "description": "Base Level Extension",
+  "name": "Quick Search Menu",
+  "description": "Easily search emojis/phrases/words with a simple menu. To use, go to any input box and type ':'",
   "version": "1.0",
   "action": {
     "default_popup": "html/search.html",

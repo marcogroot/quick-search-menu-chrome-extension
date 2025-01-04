@@ -48,10 +48,12 @@
                 </tr>
                 <tr class="expandable-content">
                     <td colspan="1">
-                        <p>
-                            This section allows you to set basic settings, such
-                            as language, theme, and default preferences.
-                        </p>
+                        <div>Change the search symbol (default ':')</div>
+                        <input id="searchSymbolInput"></input>
+                        <button id="saveSearchSymbolButon">Save Changes</button>
+                        <button id="resetToDefaultSearchSymbol">
+                            Reset search symbol to default
+                        </button>
                     </td>
                 </tr>
                 <tr class="expandable-row">
@@ -60,24 +62,19 @@
                 <tr class="expandable-content">
                     <td colspan="1">
                         <p>
-                            Here you can manage which websites are enabled or
-                            disabled for specific features or access.
+                            Here you can manage which websites are disabled
                         </p>
                     </td>
                 </tr>
                 <tr class="expandable-row">
-                    <td>Configure emoji (rename, remove, add, reorder)</td>
+                    <td>Configure emoji (rename, remove, add)</td>
                 </tr>
                 <tr class="expandable-content">
                     <td colspan="1">
-                        <p>
-                            This is where you can customize your emoji set. You
-                            can rename existing emojis, remove unwanted ones or
-                            reorder them.
-                        </p>
+                        <p>Format must be JSON</p>
                         <textarea id="json-editor"></textarea>
                         <br />
-                        <button id="saveButton">Save Changes</button>
+                        <button id="saveEmojisButton">Save Changes</button>
                         <button id="resetToDefault">
                             Reset emoji list to default
                         </button>

@@ -38,10 +38,31 @@ async function populateCurrentEmojiList() {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  const saveEmojiListButton = document.getElementById("saveButton");
+  const saveEmojiListButton = document.getElementById("saveEmojisButton");
   saveEmojiListButton.addEventListener("click", () => {
     setEmojiData();
     populateCurrentEmojiList();
+  });
+
+  const saveSearchSymbolButton = document.getElementById(
+    "saveSearchSymbolButon",
+  );
+  saveSearchSymbolButton.addEventListener("click", () => {
+    setSearchSymbol();
+  });
+  const resetToDefaultSearchSymbolButton = document.getElementById(
+    "resetToDefaultSearchSymbol",
+  );
+  const searchSymbolInputBox = document.getElementById("searchSymbolInput");
+  searchSymbolInputBox.addEventListener("input", function (event) {
+    if (searchSymbolInputBox.value.length > 1) {
+      searchSymbolInputBox.value = searchSymbolInputBox.value.slice(0, 1);
+    }
+  });
+
+  resetToDefaultSearchSymbolButton.addEventListener("click", () => {
+    resetConfigToDefault("searchSymbol");
+    searchSymbolInputBox.value = ":";
   });
 
   const resetToDefaultEmojisButton = document.getElementById("resetToDefault");
@@ -50,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       "Are you sure you want to reset emoji list to default?",
     );
     if (confirmation) {
-      resetEmojisToDefault();
+      resetConfigToDefault("emojis");
       populateCurrentEmojiList();
     }
   });
@@ -70,13 +91,34 @@ document.addEventListener("DOMContentLoaded", async function () {
   });
 });
 
-function resetEmojisToDefault() {
-  chrome.storage.local.remove("emojis", function () {
+function resetConfigToDefault(configName) {
+  chrome.storage.local.remove(configName, function () {
     if (chrome.runtime.lastError) {
-      console.error("Error removing default emojis:", chrome.runtime.lastError);
+      console.error(
+        "Error removing default",
+        chrome.runtime.lastError,
+        configName,
+      );
     } else {
-      console.log("Default emojis removed successfully!");
-      alert("Emojis reset to default!");
+      alert(`${configName} reset to default!`);
+    }
+  });
+}
+
+function setSearchSymbol() {
+  const searchSymbolInputBox = document.getElementById("searchSymbolInput");
+  const newSearchSymbol = searchSymbolInputBox.value;
+  if (newSearchSymbol.length != 1) {
+    alert("Search symbol should only be a single character");
+    return;
+  }
+  console.log("Saving new search symbol:", newSearchSymbol);
+  chrome.storage.local.set({ searchSymbol: newSearchSymbol }, function () {
+    if (chrome.runtime.lastError) {
+      console.error("Error setting storage:", chrome.runtime.lastError);
+      alert("Failed to update, try again");
+    } else {
+      alert("Successfully updated search symbol");
     }
   });
 }
@@ -87,6 +129,13 @@ function setEmojiData() {
   const editedJson = parseJson(editedJsonString);
   if (editedJson) {
     console.log("Saving JSON:", editedJson);
+    chrome.storage.local.set({ emojis: editedJson }, function () {
+      if (chrome.runtime.lastError) {
+        console.error("Error setting storage:", chrome.runtime.lastError);
+        alert("There was an error updating the new list, please try again");
+      } else {
+      }
+    });
     alert("Successfully updated emoji list!");
   } else {
     alert(
@@ -94,14 +143,6 @@ function setEmojiData() {
     );
     return;
   }
-
-  chrome.storage.local.set({ emojis: editedJson }, function () {
-    if (chrome.runtime.lastError) {
-      console.error("Error setting storage:", chrome.runtime.lastError);
-    } else {
-      console.log("Data stored successfully!");
-    }
-  });
 }
 
 function formatJson(data) {

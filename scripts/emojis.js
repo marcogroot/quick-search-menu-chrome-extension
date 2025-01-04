@@ -1,15 +1,5 @@
 let emojis = null;
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
-  console.log("The settings were updated!");
-  for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(
-      `Storage key "${key}" in namespace "${namespace}" changed.`,
-      `Old value was "${oldValue}", new value is "${newValue}".`,
-    );
-  }
-});
-
 async function loadJsonEmojisFallBack() {
   console.log("Fallback to default emojis");
   const url = chrome.runtime.getURL("emojis.json");
