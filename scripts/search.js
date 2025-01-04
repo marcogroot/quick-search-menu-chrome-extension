@@ -8,6 +8,13 @@ function getSearchedEmoji(emojiText, searchIndex) {
   }
 }
 
+function searchExactEmoji(emojiText) {
+  let emojis = getEmojis();
+  if (emojis.hasOwnProperty(emojiText)) {
+    return emojis[emojiText];
+  } else return null;
+}
+
 function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   let div = document.createElement("div");
   let toolTip = createToolTipElement();

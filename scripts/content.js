@@ -55,7 +55,7 @@ function runEmojiMenu(inputs, ariaInputs) {
       let emojiSearchBox = createEmojiMenu();
       emojiSearchBox.focus();
     } else if (e.key === "Enter" && emojiMenuUp) {
-      handleEmojjiInsertion(e, searchResults);
+      handleEmojjiInsertionWithEnter(e, searchResults);
     }
   }
 
@@ -84,8 +84,16 @@ function runEmojiMenu(inputs, ariaInputs) {
 
     // TODO types two colons, if there is only 1 result then insert it, otherwise close
     if (lastTyped == ":") {
+      let exactEmoji = searchExactEmoji(emojiText);
+      if (exactEmoji != null) {
+        handleEmojiInsertion(exactEmoji, true);
+      } else {
+        closeEmojiMenu();
+      }
+      return;
     }
 
+    // If the user types colon followed by a space, just close the menu
     if (lastTyped == " " && selectionStart - 2 == colonIndex) {
       closeEmojiMenu();
       return;
@@ -117,7 +125,7 @@ function runEmojiMenu(inputs, ariaInputs) {
         searchIndex--;
         searchIndex = Math.max(0, searchIndex);
       } else if (e.key === "Enter") {
-        handleEmojjiInsertion(e, searchResults);
+        handleEmojjiInsertionWithEnter(e, searchResults);
       } else {
         emojiSearchMenu.blur();
         currentInputBox.focus();
@@ -162,7 +170,7 @@ function runEmojiMenu(inputs, ariaInputs) {
     emojiText = "";
   }
 
-  function handleEmojjiInsertion(e, searchResults) {
+  function handleEmojjiInsertionWithEnter(e, searchResults) {
     e.preventDefault();
     if (searchResults == null || searchResults.length === 0) {
       closeEmojiMenu();
@@ -170,13 +178,21 @@ function runEmojiMenu(inputs, ariaInputs) {
     }
     const searchedEmoji = getSearchedEmoji(emojiText, searchIndex);
 
+    handleEmojiInsertion(searchedEmoji, false);
+  }
+
+  function handleEmojiInsertion(searchedEmoji, insertedWithColon) {
     let currentText = currentInputBox.value;
 
     let left = currentText.substr(0, colonIndex);
     if (colonIndex === 0) {
       left = "";
     }
-    let right = currentText.substr(colonIndex + 1 + emojiText.length);
+    let rigth_start_index = colonIndex + 1;
+    if (insertedWithColon) {
+      rigth_start_index += 1;
+    }
+    let right = currentText.substr(rigth_start_index + emojiText.length);
     const newText = left + searchedEmoji + right;
     currentInputBox.value = newText;
     currentInputBox.setSelectionRange(colonIndex + 1, colonIndex + 1);
@@ -184,17 +200,4 @@ function runEmojiMenu(inputs, ariaInputs) {
     closeEmojiMenu();
     return;
   }
-}
-
-function isDivInTopHalf(divElement) {
-  if (!divElement) {
-    return false;
-  }
-
-  const rect = divElement.getBoundingClientRect();
-  const viewportHeight =
-    window.innerHeight || document.documentElement.clientHeight;
-  const divCenterY = rect.top + rect.height / 2;
-
-  return divCenterY < viewportHeight / 2;
 }
