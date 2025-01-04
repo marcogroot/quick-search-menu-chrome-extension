@@ -2,9 +2,8 @@ var inputs, index;
 var colonIndex = -1;
 var emojiMenuUp = false;
 var searchIndex = 0;
-var currentInputBox;
+var focusedInputBox;
 let emojiText = "";
-let emojiMenuFocused = false;
 
 function runEmojiMenu(inputs, ariaInputs) {
   document.addEventListener("keydown", function (e) {
@@ -17,6 +16,11 @@ function runEmojiMenu(inputs, ariaInputs) {
     let currentInput = inputs[index];
     currentInput.addEventListener("keydown", function (e) {
       handleInputKeydownEvents(e, currentInput);
+    });
+    currentInput.addEventListener("focus", function (e) {
+      if (currentInput != focusedInputBox) {
+        closeEmojiMenu();
+      }
     });
     currentInput.addEventListener("input", function (e) {
       handleInputText(
@@ -49,7 +53,7 @@ function runEmojiMenu(inputs, ariaInputs) {
       currentInput.blur();
       let emojiSearchBox = createEmojiMenu();
       emojiSearchBox.focus();
-      currentInputBox = currentInput;
+      focusedInputBox = currentInput;
     } else if (e.key === "ArrowUp") {
       currentInput.blur();
       let emojiSearchBox = createEmojiMenu();
@@ -65,7 +69,7 @@ function runEmojiMenu(inputs, ariaInputs) {
     selectionStart,
     currentInput,
   ) {
-    currentInputBox = currentInput;
+    focusedInputBox = currentInput;
 
     // if there is no menu
     // They typed a colon -> open search menu
@@ -128,7 +132,7 @@ function runEmojiMenu(inputs, ariaInputs) {
         handleEmojjiInsertionWithEnter(e, searchResults);
       } else {
         emojiSearchMenu.blur();
-        currentInputBox.focus();
+        focusedInputBox.focus();
       }
 
       let searchResultListSize = searchResults.length;
@@ -146,13 +150,13 @@ function runEmojiMenu(inputs, ariaInputs) {
       (n) => n && n.remove(),
     );
 
-    const rect = currentInputBox.getBoundingClientRect();
+    const rect = focusedInputBox.getBoundingClientRect();
     emojiSearchMenu.style.left = rect.left + "px";
 
     document.body.appendChild(emojiSearchMenu);
     let emojiSearchMenuHeight = emojiSearchMenu.getBoundingClientRect().height;
 
-    if (isDivInTopHalf(currentInputBox)) {
+    if (isDivInTopHalf(focusedInputBox)) {
       emojiSearchMenu.style.top = rect.top + rect.height + "px";
     } else {
       emojiSearchMenu.style.top = rect.top - emojiSearchMenuHeight + "px";
@@ -182,7 +186,7 @@ function runEmojiMenu(inputs, ariaInputs) {
   }
 
   function handleEmojiInsertion(searchedEmoji, insertedWithColon) {
-    let currentText = currentInputBox.value;
+    let currentText = focusedInputBox.value;
 
     let left = currentText.substr(0, colonIndex);
     if (colonIndex === 0) {
@@ -194,9 +198,9 @@ function runEmojiMenu(inputs, ariaInputs) {
     }
     let right = currentText.substr(rigth_start_index + emojiText.length);
     const newText = left + searchedEmoji + right;
-    currentInputBox.value = newText;
-    currentInputBox.setSelectionRange(colonIndex + 1, colonIndex + 1);
-    currentInputBox.focus();
+    focusedInputBox.value = newText;
+    focusedInputBox.setSelectionRange(colonIndex + 1, colonIndex + 1);
+    focusedInputBox.focus();
     closeEmojiMenu();
     return;
   }
