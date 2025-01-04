@@ -1,5 +1,4 @@
 MUST DO:
-if enter pressed and no results close menu
 parse emojis from json file, let it be edited
 Add option to disable the popup on the given website
 add clickable emjoji search results
@@ -11,3 +10,4 @@ cancel if u do ": "
 DONE:
 add overwrite to html to appear on top of everything @03-01-2025-20:39
 appear on top or bottom of page dynamically @03-01-2025-20:39
+if enter pressed and no results close menu @04-01-2025-17:23

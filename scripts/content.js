@@ -137,7 +137,6 @@ function runEmojiMenu(inputs, ariaInputs) {
   }
 
   function closeEmojiMenu() {
-    console.log("Close emoji menu");
     emojiMenuUp = false;
     [...document.getElementsByClassName("emoji-search-box")].map(
       (n) => n && n.remove(),
@@ -166,13 +165,8 @@ function runEmojiMenu(inputs, ariaInputs) {
       closeEmojiMenu();
       return;
     }
-    const chosenEmojiString = searchResults[searchIndex].textContent;
-    const chosenEmojiArray = Array.from(chosenEmojiString);
-    const chosenEmojiSize = chosenEmojiArray.length;
-    const chosenEmoji = chosenEmojiArray[chosenEmojiSize - 1];
+    const searchedEmoji = getSearchedEmoji(emojiText, searchIndex);
 
-    console.log(currentInputBox);
-    console.log(`marco test ${currentInputBox.value}`);
     let currentText = currentInputBox.value;
 
     let left = currentText.substr(0, colonIndex);
@@ -180,8 +174,7 @@ function runEmojiMenu(inputs, ariaInputs) {
       left = "";
     }
     let right = currentText.substr(colonIndex + 1 + emojiText.length);
-    const newText = left + chosenEmoji + right;
-    console.log(`The new text is ${newText}`);
+    const newText = left + searchedEmoji + right;
     currentInputBox.value = newText;
     closeEmojiMenu();
     currentInputBox.focus();
