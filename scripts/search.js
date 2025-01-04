@@ -1,7 +1,9 @@
 function getSearchedEmoji(emojiText, searchIndex) {
   let count = 0;
-  for (const [emoji_name, emoji] of Object.entries(getEmojis())) {
-    if (emoji_name.includes(emojiText)) {
+  for (const [index, entry] of Object.entries(getEmojis())) {
+    let emojiName = entry[0];
+    let emoji = entry[1];
+    if (emojiName.includes(emojiText)) {
       if (count == searchIndex) return emoji;
       count++;
     }
@@ -9,10 +11,14 @@ function getSearchedEmoji(emojiText, searchIndex) {
 }
 
 function searchExactEmoji(emojiText) {
-  let emojis = getEmojis();
-  if (emojis.hasOwnProperty(emojiText)) {
-    return emojis[emojiText];
-  } else return null;
+  for (const [index, entry] of Object.entries(getEmojis())) {
+    let emojiName = entry[0];
+    let emoji = entry[1];
+    if (emojiName == emojiText) {
+      return emoji;
+    }
+  }
+  return null;
 }
 
 function createEmojiSearchMenuHtml(emojiText, searchIndex) {
@@ -23,9 +29,11 @@ function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   let list = document.createElement("ul");
 
   let count = 0;
-  for (const [emoji_name, emoji] of Object.entries(getEmojis())) {
-    if (emoji_name.includes(emojiText)) {
-      let listItem = createlistItemElement(emoji_name, emoji);
+  for (const [index, entry] of Object.entries(getEmojis())) {
+    let emojiName = entry[0];
+    let emoji = entry[1];
+    if (emojiName.includes(emojiText)) {
+      let listItem = createlistItemElement(emojiName, emoji);
       if (count === searchIndex) {
         listItem.style.backgroundColor = "lavender";
       }
@@ -45,6 +53,7 @@ function createEmojiSearchMenuHtml(emojiText, searchIndex) {
   div.tabIndex = 0;
   div.style.width = "200px";
   div.style.position = "fixed";
+  div.style.cursor = "pointer";
 
   return div;
 }
@@ -54,6 +63,7 @@ function createToolTipElement() {
   toolTip.style.backgroundColor = "#f2f2f2";
   toolTip.style.border = "1px solid #ddd";
   toolTip.innerText = "Press escape to close";
+  toolTip.id = "search-box-tooltip";
   return toolTip;
 }
 

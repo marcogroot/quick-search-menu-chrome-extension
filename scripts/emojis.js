@@ -8,7 +8,7 @@ async function loadJsonEmojisFallBack() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     let defaultEmojis = await response.json();
-    return defaultEmojis;
+    return Object.entries(defaultEmojis);
   } catch (error) {
     console.error("Error fetching emojis:", error);
   }
@@ -27,5 +27,6 @@ async function loadEmojis() {
 loadEmojis();
 
 function getEmojis() {
+  console.log(emojis[0][0]);
   return emojis;
 }

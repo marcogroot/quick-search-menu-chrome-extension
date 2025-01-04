@@ -7,7 +7,7 @@ async function loadJsonEmojisFallBack() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     let defaultEmojis = await response.json();
-    return defaultEmojis;
+    return Object.entries(defaultEmojis);
   } catch (error) {
     console.error("Error fetching emojis:", error);
   }
@@ -32,7 +32,7 @@ async function populateCurrentEmojiList() {
       white-space: pre-wrap;
       overflow: auto;
     `;
-      jsonEditor.value = formatJson(emojis);
+      jsonEditor.value = formatEmojiStringToJson(emojis);
     }
   });
 }
@@ -145,18 +145,25 @@ function setEmojiData() {
   }
 }
 
-function formatJson(data) {
+function formatEmojiStringToJson(data) {
   try {
-    return JSON.stringify(data, null, 2); // Indent with 2 spaces
+    const emojiObject = {};
+
+    data.forEach((row, index) => {
+      emojiObject[row[0]] = row[1];
+    });
+
+    return JSON.stringify(emojiObject, null, 2);
   } catch (error) {
-    console.error("error formatting json", error);
-    return "";
+    console.error("Error formatting JSON:", error);
+    return "{}";
   }
 }
 
 function parseJson(jsonString) {
   try {
-    return JSON.parse(jsonString);
+    let jsonData = JSON.parse(jsonString);
+    return Object.entries(jsonData);
   } catch (error) {
     console.log("error parsing json", error);
     return null;
