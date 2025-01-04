@@ -1,6 +1,5 @@
 MUST DO:
 Add option to disable the popup on the given website
-add clickable emjoji search results
 
 MAYBE DO:
 
@@ -11,3 +10,4 @@ if enter pressed and no results close menu @04-01-2025-17:23
 cancel if u do ": " @04-01-2025-18:32
 if string starts and ends with colon then try to find result @04-01-2025-18:57
 parse emojis from json file, let it be edited @04-01-2025-23:45
+add clickable emjoji search results @05-01-2025-08:06

@@ -6,7 +6,6 @@ chrome.storage.local.get("searchSymbol", function (data) {
   } else {
     if (data.searchSymbol) {
       searchSymbol = data.searchSymbol;
-      console.log("Search symbol is ", searchSymbol);
     }
   }
 });
@@ -59,10 +58,8 @@ function runEmojiMenu(inputs, ariaInputs) {
     let searchResults = document.getElementsByClassName(
       "emoji-search-box-result",
     );
-    let searchSize = searchResults.length;
     if (e.key === "ArrowDown") {
-      searchIndex = 1;
-      searchIndex = Math.min(searchSize - 1, searchIndex);
+      setSearchIndex(1);
       currentInput.blur();
       let emojiSearchBox = createEmojiMenu();
       emojiSearchBox.focus();
@@ -72,7 +69,7 @@ function runEmojiMenu(inputs, ariaInputs) {
       let emojiSearchBox = createEmojiMenu();
       emojiSearchBox.focus();
     } else if (e.key === "Enter" && emojiMenuUp) {
-      handleEmojjiInsertionWithEnter(e, searchResults);
+      handleEmojjiInsertionWithEnter(e);
     }
   }
 
@@ -118,7 +115,7 @@ function runEmojiMenu(inputs, ariaInputs) {
 
     // Else they are currently typing out an emoji
     emojiText = textContent.substring(searchSymbolIndex + 1, selectionStart);
-    searchIndex = 0;
+    setSearchIndex(0);
     let newEmojiMenu = createEmojiMenu();
     existingMenu = newEmojiMenu;
   }
@@ -132,30 +129,17 @@ function runEmojiMenu(inputs, ariaInputs) {
       let searchResults = document.getElementsByClassName(
         "emoji-search-box-result",
       );
-      let searchSize = searchResults.length;
-
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        searchIndex++;
-        searchIndex = Math.min(searchSize - 1, searchIndex);
+        setSearchIndex(searchIndex + 1);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        searchIndex--;
-        searchIndex = Math.max(0, searchIndex);
+        setSearchIndex(searchIndex - 1);
       } else if (e.key === "Enter") {
-        handleEmojjiInsertionWithEnter(e, searchResults);
+        handleEmojjiInsertionWithEnter(e);
       } else {
         emojiSearchMenu.blur();
         focusedInputBox.focus();
-      }
-
-      for (index = 0; index < searchSize; ++index) {
-        let listItem = searchResults[index];
-        if (searchIndex === index) {
-          listItem.style.backgroundColor = "lavender";
-        } else {
-          listItem.style.backgroundColor = "#f2f2f2";
-        }
       }
     });
 
@@ -174,6 +158,18 @@ function runEmojiMenu(inputs, ariaInputs) {
     } else {
       emojiSearchMenu.style.top = rect.top - emojiSearchMenuHeight + "px";
     }
+
+    Array.from(
+      document.getElementsByClassName("emoji-search-box-result"),
+    ).forEach((item, index) => {
+      item.addEventListener("mouseover", () => {
+        setSearchIndex(index);
+      });
+      item.addEventListener("click", () => {
+        handleEmojjiInsertionWithClick();
+      });
+    });
+
     return emojiSearchMenu;
   }
 
@@ -182,13 +178,29 @@ function runEmojiMenu(inputs, ariaInputs) {
     [...document.getElementsByClassName("emoji-search-box")].map(
       (n) => n && n.remove(),
     );
-    searchIndex = 0;
+    setSearchIndex(0);
     searchSymbolIndex = -1;
     emojiText = "";
   }
 
-  function handleEmojjiInsertionWithEnter(e, searchResults) {
+  function handleEmojjiInsertionWithClick() {
+    let searchResults = document.getElementsByClassName(
+      "emoji-search-box-result",
+    );
+    if (searchResults == null || searchResults.length === 0) {
+      closeEmojiMenu();
+      return;
+    }
+    const searchedEmoji = getSearchedEmoji(emojiText, searchIndex);
+
+    handleEmojiInsertion(searchedEmoji, false);
+  }
+
+  function handleEmojjiInsertionWithEnter(e) {
     e.preventDefault();
+    let searchResults = document.getElementsByClassName(
+      "emoji-search-box-result",
+    );
     if (searchResults == null || searchResults.length === 0) {
       closeEmojiMenu();
       return;
@@ -219,5 +231,24 @@ function runEmojiMenu(inputs, ariaInputs) {
     focusedInputBox.focus();
     closeEmojiMenu();
     return;
+  }
+}
+
+function setSearchIndex(newIndex) {
+  let searchResults = document.getElementsByClassName(
+    "emoji-search-box-result",
+  );
+  let searchSize = searchResults.length;
+
+  searchIndex = Math.min(searchSize - 1, newIndex);
+  searchIndex = Math.max(0, searchIndex);
+
+  for (index = 0; index < searchSize; ++index) {
+    let listItem = searchResults[index];
+    if (index === searchIndex) {
+      listItem.style.backgroundColor = "lavender";
+    } else {
+      listItem.style.backgroundColor = "#f2f2f2";
+    }
   }
 }

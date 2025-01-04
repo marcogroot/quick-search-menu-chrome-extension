@@ -1,7 +1,6 @@
 let emojis = null;
 
 async function loadJsonEmojisFallBack() {
-  console.log("Fallback to default emojis");
   const url = chrome.runtime.getURL("emojis.json");
   try {
     const response = await fetch(url);
@@ -21,7 +20,6 @@ async function loadEmojis() {
       console.error("Error getting storage:", chrome.runtime.lastError);
     } else {
       emojis = data.emojis ?? (await loadJsonEmojisFallBack());
-      console.log("Retrieved emojis:", emojis);
     }
   });
 }
