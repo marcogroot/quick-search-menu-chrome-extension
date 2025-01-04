@@ -19,7 +19,12 @@ function runEmojiMenu(inputs, ariaInputs) {
       handleInputKeydownEvents(e, currentInput);
     });
     currentInput.addEventListener("input", function (e) {
-      handleInputText(e.target.value, currentInput);
+      handleInputText(
+        e.target.value,
+        e.data,
+        currentInput.selectionStart,
+        currentInput,
+      );
     });
   }
 
@@ -54,31 +59,42 @@ function runEmojiMenu(inputs, ariaInputs) {
     }
   }
 
-  function handleInputText(textContent, currentInputBoxElement) {
-    currentInputBox = currentInputBoxElement;
-    const lastIndex = textContent.length - 1;
-    const c = textContent.charAt(lastIndex);
+  function handleInputText(
+    textContent,
+    lastTyped,
+    selectionStart,
+    currentInput,
+  ) {
+    currentInputBox = currentInput;
 
+    // if there is no menu
+    // They typed a colon -> open search menu
+    // else -> exit out
     if (colonIndex == -1) {
-      if (c != ":") return;
-      colonIndex = lastIndex;
-      createEmojiMenu(currentInputBox, "");
-    } else if (textContent[colonIndex] != ":") {
-      closeEmojiMenu();
-    } else {
-      let emojiTextIndex = colonIndex + 1;
-      emojiText = "";
-      while (
-        emojiTextIndex < textContent.length &&
-        (textContent[emojiTextIndex] != " " ||
-          textContent[emojiTextIndex] != "\n")
-      ) {
-        emojiText += textContent[emojiTextIndex];
-        emojiTextIndex++;
-      }
-      let newEmojiMenu = createEmojiMenu();
-      existingMenu = newEmojiMenu;
+      if (lastTyped != ":") return;
+      colonIndex = selectionStart - 1;
+      createEmojiMenu(currentInput, "");
+      return;
     }
+    // close menu if you start typing somewhere else;
+    if (textContent[colonIndex] != ":") {
+      closeEmojiMenu();
+      return;
+    }
+
+    // TODO types two colons, if there is only 1 result then insert it, otherwise close
+    if (lastTyped == ":") {
+    }
+
+    if (lastTyped == " " && selectionStart - 2 == colonIndex) {
+      closeEmojiMenu();
+      return;
+    }
+
+    // Else they are currently typing out an emoji
+    emojiText = textContent.substring(colonIndex + 1, selectionStart);
+    let newEmojiMenu = createEmojiMenu();
+    existingMenu = newEmojiMenu;
   }
 
   function createEmojiMenu() {
@@ -146,19 +162,6 @@ function runEmojiMenu(inputs, ariaInputs) {
     emojiText = "";
   }
 
-  function getEmojiSearchBox() {
-    return document.getElementsByClassName("emoji-search-box")[0];
-  }
-
-  function setTextboxValue(textBox, newValue) {
-    const range = document.createRange();
-    range.selectNodeContents(textBox);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-    document.execCommand("insertText", false, newValue);
-  }
-
   function handleEmojjiInsertion(e, searchResults) {
     e.preventDefault();
     if (searchResults == null || searchResults.length === 0) {
@@ -176,8 +179,9 @@ function runEmojiMenu(inputs, ariaInputs) {
     let right = currentText.substr(colonIndex + 1 + emojiText.length);
     const newText = left + searchedEmoji + right;
     currentInputBox.value = newText;
-    closeEmojiMenu();
+    currentInputBox.setSelectionRange(colonIndex + 1, colonIndex + 1);
     currentInputBox.focus();
+    closeEmojiMenu();
     return;
   }
 }

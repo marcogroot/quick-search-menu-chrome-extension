@@ -16,7 +16,8 @@
         "scripts/startup.js",
         "scripts/content.js",
         "scripts/search.js",
-        "scripts/emojis.js"
+        "scripts/emojis.js",
+        "scripts/util.js"
       ],
       "matches": ["http://*/*", "https://*/*"],
       "run_at": "document_end"
