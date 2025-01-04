@@ -10,3 +10,10 @@ function isDivInTopHalf(divElement) {
 
   return divCenterY < viewportHeight / 2;
 }
+
+function setData(key, obj) {
+  var values = JSON.stringify(obj);
+  chrome.storage.local.set({ key: values }).then(() => {
+    console.log("Value is set");
+  });
+}
