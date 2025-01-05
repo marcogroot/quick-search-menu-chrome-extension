@@ -1,7 +1,10 @@
 setTimeout(() => {
   // Code to be executed after 5 seconds
-  ariaTextBoxes = document.querySelectorAll('[role="textbox"]');
+  contentEditableInputs = document.querySelectorAll('[contenteditable="true"]');
   inputs = document.getElementsByTagName("input");
+  searchBoxes = document.getElementsByTagName("search");
+  textAreas = document.getElementsByTagName("textarea");
 
-  runEmojiMenu(inputs, ariaTextBoxes);
-}, 100);
+  console.log("Started");
+  runEmojiMenu(inputs, searchBoxes, textAreas, contentEditableInputs);
+}, 3000);

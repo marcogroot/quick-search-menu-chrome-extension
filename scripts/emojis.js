@@ -27,6 +27,5 @@ async function loadEmojis() {
 loadEmojis();
 
 function getEmojis() {
-  console.log(emojis[0][0]);
   return emojis;
 }

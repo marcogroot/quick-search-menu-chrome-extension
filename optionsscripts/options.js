@@ -20,7 +20,6 @@ async function populateCurrentEmojiList() {
     } else {
       let emojis = null;
       emojis = data.emojis ?? (await loadJsonEmojisFallBack());
-      console.log("Emojis", emojis);
 
       const jsonEditor = document.getElementById("json-editor");
       jsonEditor.style.cssText = `

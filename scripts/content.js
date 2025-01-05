@@ -1,4 +1,10 @@
 let searchSymbol = ":";
+let inputs, index;
+let searchSymbolIndex = -1;
+let emojiMenuUp = false;
+let searchIndex = 0;
+let focusedInputBox;
+let emojiText = "";
 
 chrome.storage.local.get("searchSymbol", function (data) {
   if (chrome.runtime.lastError) {
@@ -10,14 +16,10 @@ chrome.storage.local.get("searchSymbol", function (data) {
   }
 });
 
-let inputs, index;
-let searchSymbolIndex = -1;
-let emojiMenuUp = false;
-let searchIndex = 0;
-let focusedInputBox;
-let emojiText = "";
-
-function runEmojiMenu(inputs, ariaInputs) {
+// This run emoji menu function gets run multiple times on startup, incase the input boxes haven't loaded yet
+// Tried using load on document end but didnt work consistently (example messenger.com)
+// Seperate params for inputs, searchboxes and text areas because it didnt work otherwise for some reason
+function runEmojiMenu(inputs, searchBoxes, textAreas, contentEditableBoxes) {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       closeEmojiMenu();
@@ -44,12 +46,63 @@ function runEmojiMenu(inputs, ariaInputs) {
     });
   }
 
-  ariaTextBoxes.forEach((textbox) => {
-    textbox.addEventListener("keydown", function (e) {
-      handleInputKeydownEvents(e, textbox);
+  for (index = 0; index < searchBoxes.length; ++index) {
+    let currentInput = searchBoxes[index];
+    currentInput.addEventListener("keydown", function (e) {
+      handleInputKeydownEvents(e, currentInput);
     });
-    textbox.addEventListener("input", (event) => {
-      handleInputText(event.target.textContent, textbox);
+    currentInput.addEventListener("focus", function (e) {
+      if (currentInput != focusedInputBox) {
+        closeEmojiMenu();
+      }
+    });
+    currentInput.addEventListener("input", function (e) {
+      handleInputText(
+        e.target.value,
+        e.data,
+        currentInput.selectionStart,
+        currentInput,
+      );
+    });
+  }
+
+  for (index = 0; index < textAreas.length; ++index) {
+    let currentInput = textAreas[index];
+    currentInput.addEventListener("keydown", function (e) {
+      handleInputKeydownEvents(e, currentInput);
+    });
+    currentInput.addEventListener("focus", function (e) {
+      if (currentInput != focusedInputBox) {
+        closeEmojiMenu();
+      }
+    });
+    currentInput.addEventListener("input", function (e) {
+      handleInputText(
+        e.target.value,
+        e.data,
+        currentInput.selectionStart,
+        currentInput,
+      );
+    });
+  }
+
+  contentEditableBoxes.forEach((currentInput) => {
+    currentInput.addEventListener("keydown", function (e) {
+      handleInputKeydownEvents(e, currentInput);
+    });
+    currentInput.addEventListener("focus", function (e) {
+      if (currentInput != focusedInputBox) {
+        closeEmojiMenu();
+      }
+    });
+    currentInput.addEventListener("input", (e) => {
+      console.log("AAA");
+      handleInputText(
+        e.target.textContent,
+        e.data,
+        getSelectionInfo(),
+        currentInput,
+      );
     });
   });
 }
@@ -73,31 +126,8 @@ function setSearchIndex(newIndex) {
   }
 }
 
-function addMouseControls() {
-  Array.from(
-    document.getElementsByClassName("emoji-search-box-result"),
-  ).forEach((item, index) => {
-    item.addEventListener("mouseover", () => {
-      setSearchIndex(index);
-    });
-    item.addEventListener("click", () => {
-      handleEmojjiInsertionWithClick();
-    });
-  });
-
-  document
-    .getElementById("search-box-tooltip")
-    .addEventListener("click", () => {
-      closeEmojiMenu();
-      focusedInputBox.focus();
-    });
-}
-
 function handleInputKeydownEvents(e, currentInput) {
   if (!emojiMenuUp) return;
-  let searchResults = document.getElementsByClassName(
-    "emoji-search-box-result",
-  );
   if (e.key === "ArrowDown") {
     setSearchIndex(1);
     currentInput.blur();
@@ -161,9 +191,6 @@ function createEmojiMenu() {
 
   emojiSearchMenu.addEventListener("keydown", function (e) {
     if (!emojiMenuUp) return;
-    let searchResults = document.getElementsByClassName(
-      "emoji-search-box-result",
-    );
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSearchIndex(searchIndex + 1);
@@ -238,23 +265,94 @@ function handleEmojjiInsertionWithEnter(e) {
 
 function handleEmojiInsertion(searchedEmoji, insertedWithColon) {
   let currentText = focusedInputBox.value;
+  let isAriaTextBox = false;
+  if (!currentText) {
+    isAriaTextBox = true;
+    currentText = focusedInputBox.textContent;
+  }
+  console.log("Current text ", currentText);
 
-  let left = currentText.substr(0, searchSymbolIndex);
-  if (searchSymbolIndex === 0) {
-    left = "";
+  if (isAriaTextBox) {
+    focusedInputBox.focus();
+    const selection = window.getSelection();
+    if (!selection) {
+      console.error("Could not get selection object.");
+      return;
+    }
+
+    const range = selection.getRangeAt(0); // Get the current range
+    if (!range) {
+      console.error("Could not get range object.");
+      return;
+    }
+
+    // Check if the range is in the focused input box
+    if (!focusedInputBox.contains(range.commonAncestorContainer)) {
+      console.warn(
+        "Selection is not within the focused input box. Doing nothing",
+      );
+      return;
+    }
+
+    // Calculate the new start position for the range
+    let newStart = range.startOffset;
+    newStart = searchSymbolIndex;
+    range.setStart(range.startContainer, newStart);
+    range.setEnd(range.startContainer, newStart + emojiText.length + 1);
+    console.log(range);
+    range.deleteContents();
+
+    document.execCommand("insertText", false, searchedEmoji);
+  } else {
+    let left = currentText.substr(0, searchSymbolIndex);
+    if (searchSymbolIndex === 0) {
+      left = "";
+    }
+    let rigth_start_index = searchSymbolIndex + 1;
+    if (insertedWithColon) {
+      rigth_start_index += 1;
+    }
+    let right = currentText.substr(rigth_start_index + emojiText.length);
+    const newText = left + searchedEmoji + right;
+    focusedInputBox.value = newText;
+    focusedInputBox.setSelectionRange(
+      searchSymbolIndex + searchedEmoji.length,
+      searchSymbolIndex + searchedEmoji.length,
+    );
   }
-  let rigth_start_index = searchSymbolIndex + 1;
-  if (insertedWithColon) {
-    rigth_start_index += 1;
-  }
-  let right = currentText.substr(rigth_start_index + emojiText.length);
-  const newText = left + searchedEmoji + right;
-  focusedInputBox.value = newText;
-  focusedInputBox.setSelectionRange(
-    searchSymbolIndex + searchedEmoji.length,
-    searchSymbolIndex + searchedEmoji.length,
-  );
+
   focusedInputBox.focus();
   closeEmojiMenu();
   return;
+}
+
+function addMouseControls() {
+  Array.from(
+    document.getElementsByClassName("emoji-search-box-result"),
+  ).forEach((item, index) => {
+    item.addEventListener("mouseover", () => {
+      setSearchIndex(index);
+    });
+    item.addEventListener("click", () => {
+      handleEmojjiInsertionWithClick();
+    });
+  });
+
+  document
+    .getElementById("search-box-tooltip")
+    .addEventListener("click", () => {
+      closeEmojiMenu();
+      focusedInputBox.focus();
+    });
+}
+
+function getSelectionInfo() {
+  const selection = window.getSelection();
+
+  if (selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0);
+    return range.endOffset;
+  } else {
+    return 0;
+  }
 }
