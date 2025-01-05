@@ -1,6 +1,5 @@
 function startExtensionWithDelay(delay) {
   setTimeout(() => {
-    // Code to be executed after 5 seconds
     contentEditableInputs = document.querySelectorAll(
       '[contenteditable="true"]',
     );
@@ -13,8 +12,12 @@ function startExtensionWithDelay(delay) {
   }, delay);
 }
 
+// Some pages take a bit to load in all the input boxes, retry on adding event listeners
 startExtensionWithDelay(10);
+startExtensionWithDelay(1000);
 startExtensionWithDelay(3000);
+startExtensionWithDelay(5000);
+startExtensionWithDelay(10000);
 
 let currentUrl = window.location.href;
 const observer = new MutationObserver((mutations) => {
@@ -26,6 +29,8 @@ const observer = new MutationObserver((mutations) => {
       window.location.href,
     );
     currentUrl = window.location.href;
+    startExtensionWithDelay(10);
+    startExtensionWithDelay(1000);
     startExtensionWithDelay(3000);
   }
 });

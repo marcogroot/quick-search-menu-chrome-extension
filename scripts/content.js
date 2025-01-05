@@ -16,9 +16,6 @@ chrome.storage.local.get("searchSymbol", function (data) {
   }
 });
 
-// This run emoji menu function gets run multiple times on startup, incase the input boxes haven't loaded yet
-// Tried using load on document end but didnt work consistently (example messenger.com)
-// Seperate params for inputs, searchboxes and text areas because it didnt work otherwise for some reason
 function runEmojiMenu(inputs, contentEditableBoxes) {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
@@ -49,23 +46,26 @@ function runEmojiMenu(inputs, contentEditableBoxes) {
   });
 
   contentEditableBoxes.forEach((currentInput) => {
-    currentInput.addEventListener("keydown", function (e) {
-      handleInputKeydownEvents(e, currentInput);
-    });
-    currentInput.addEventListener("focus", function (e) {
-      if (currentInput != focusedInputBox) {
-        closeEmojiMenu();
-      }
-    });
-    currentInput.addEventListener("input", (e) => {
-      console.log("AAA");
-      handleInputText(
-        e.target.textContent,
-        e.data,
-        getSelectionInfo(),
-        currentInput,
-      );
-    });
+    if (!currentInput.hasAttribute("searchMenuApplied")) {
+      currentInput.addEventListener("keydown", function (e) {
+        handleInputKeydownEvents(e, currentInput);
+      });
+      currentInput.addEventListener("focus", function (e) {
+        if (currentInput != focusedInputBox) {
+          closeEmojiMenu();
+        }
+      });
+      currentInput.addEventListener("input", (e) => {
+        console.log("AAA");
+        handleInputText(
+          e.target.textContent,
+          e.data,
+          getSelectionInfo(),
+          currentInput,
+        );
+      });
+    }
+    currentInput.setAttribute("searchMenuApplied", "true");
   });
 }
 
