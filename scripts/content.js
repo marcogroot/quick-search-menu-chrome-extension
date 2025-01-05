@@ -19,72 +19,34 @@ chrome.storage.local.get("searchSymbol", function (data) {
 // This run emoji menu function gets run multiple times on startup, incase the input boxes haven't loaded yet
 // Tried using load on document end but didnt work consistently (example messenger.com)
 // Seperate params for inputs, searchboxes and text areas because it didnt work otherwise for some reason
-function runEmojiMenu(inputs, searchBoxes, textAreas, contentEditableBoxes) {
+function runEmojiMenu(inputs, contentEditableBoxes) {
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       closeEmojiMenu();
     }
   });
 
-  for (index = 0; index < inputs.length; ++index) {
-    let currentInput = inputs[index];
-    currentInput.addEventListener("keydown", function (e) {
-      handleInputKeydownEvents(e, currentInput);
-    });
-    currentInput.addEventListener("focus", function (e) {
-      if (currentInput != focusedInputBox) {
-        closeEmojiMenu();
-      }
-    });
-    currentInput.addEventListener("input", function (e) {
-      handleInputText(
-        e.target.value,
-        e.data,
-        currentInput.selectionStart,
-        currentInput,
-      );
-    });
-  }
-
-  for (index = 0; index < searchBoxes.length; ++index) {
-    let currentInput = searchBoxes[index];
-    currentInput.addEventListener("keydown", function (e) {
-      handleInputKeydownEvents(e, currentInput);
-    });
-    currentInput.addEventListener("focus", function (e) {
-      if (currentInput != focusedInputBox) {
-        closeEmojiMenu();
-      }
-    });
-    currentInput.addEventListener("input", function (e) {
-      handleInputText(
-        e.target.value,
-        e.data,
-        currentInput.selectionStart,
-        currentInput,
-      );
-    });
-  }
-
-  for (index = 0; index < textAreas.length; ++index) {
-    let currentInput = textAreas[index];
-    currentInput.addEventListener("keydown", function (e) {
-      handleInputKeydownEvents(e, currentInput);
-    });
-    currentInput.addEventListener("focus", function (e) {
-      if (currentInput != focusedInputBox) {
-        closeEmojiMenu();
-      }
-    });
-    currentInput.addEventListener("input", function (e) {
-      handleInputText(
-        e.target.value,
-        e.data,
-        currentInput.selectionStart,
-        currentInput,
-      );
-    });
-  }
+  inputs.forEach((currentInput) => {
+    if (!currentInput.hasAttribute("searchMenuApplied")) {
+      currentInput.addEventListener("keydown", function (e) {
+        handleInputKeydownEvents(e, currentInput);
+      });
+      currentInput.addEventListener("focus", function (e) {
+        if (currentInput != focusedInputBox) {
+          closeEmojiMenu();
+        }
+      });
+      currentInput.addEventListener("input", function (e) {
+        handleInputText(
+          e.target.value,
+          e.data,
+          currentInput.selectionStart,
+          currentInput,
+        );
+      });
+    }
+    currentInput.setAttribute("searchMenuApplied", "true");
+  });
 
   contentEditableBoxes.forEach((currentInput) => {
     currentInput.addEventListener("keydown", function (e) {
@@ -265,36 +227,18 @@ function handleEmojjiInsertionWithEnter(e) {
 
 function handleEmojiInsertion(searchedEmoji, insertedWithColon) {
   let currentText = focusedInputBox.value;
-  let isAriaTextBox = false;
+  let isContentEditableDiv = false;
   if (!currentText) {
-    isAriaTextBox = true;
+    isContentEditableDiv = true;
     currentText = focusedInputBox.textContent;
   }
   console.log("Current text ", currentText);
 
-  if (isAriaTextBox) {
+  if (isContentEditableDiv) {
     focusedInputBox.focus();
     const selection = window.getSelection();
-    if (!selection) {
-      console.error("Could not get selection object.");
-      return;
-    }
-
     const range = selection.getRangeAt(0); // Get the current range
-    if (!range) {
-      console.error("Could not get range object.");
-      return;
-    }
 
-    // Check if the range is in the focused input box
-    if (!focusedInputBox.contains(range.commonAncestorContainer)) {
-      console.warn(
-        "Selection is not within the focused input box. Doing nothing",
-      );
-      return;
-    }
-
-    // Calculate the new start position for the range
     let newStart = range.startOffset;
     newStart = searchSymbolIndex;
     range.setStart(range.startContainer, newStart);
