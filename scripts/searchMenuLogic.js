@@ -48,9 +48,9 @@ function runSearchList(inputs, contentEditableBoxes) {
   // react text boxes
   contentEditableBoxes.forEach((currentInput) => {
     if (!currentInput.hasAttribute("searchMenuApplied")) {
-      currentInput.addEventListener("keydown", function (e) {
-        handleInputKeydownEvents(e, currentInput);
-      });
+      // currentInput.addEventListener("keydown", function (e) {
+      //   handleInputKeydownEvents(e, currentInput);
+      // });
       currentInput.addEventListener("focus", function (e) {
         if (currentInput != focusedInputBox) {
           closeSearchMenu();

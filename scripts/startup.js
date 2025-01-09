@@ -1,7 +1,7 @@
 async function getDisabledWebsites() {
   try {
-    const response = await chrome.storage.local.get("blockedWebsites");
-    return response.blockedWebsites ?? [];
+    const response = await chrome.storage.local.get("websiteConfig");
+    return response.websiteConfig ?? [];
   } catch (error) {
     console.error("Error getting storage:", error);
     return [];
@@ -22,16 +22,26 @@ function startExtensionWithDelay(delay) {
   }, delay);
 }
 
-async function main() {
+async function shouldStartExtension(currentUrl) {
   let disabledWebsites = await getDisabledWebsites();
-  let currentUrl = window.location.href;
-
   Array.from(disabledWebsites).forEach((url) => {
-    if (currentUrl.includes(url)) {
-      ("Search menu disabled on this website");
-      return;
+    const disabledWebsite = String(url);
+    if (currentUrl.includes(disabledWebsite)) {
+      console.log("Search menu disabled on this website");
+      return false;
     }
   });
+
+  return true;
+}
+
+async function main() {
+  let currentUrl = window.location.href;
+
+  startExtension = await shouldStartExtension(currentUrl);
+  if (!startExtension) {
+    return;
+  }
 
   // Some pages take a bit to load in all the input boxes, retry on adding event listeners
   startExtensionWithDelay(10);

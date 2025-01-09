@@ -61,10 +61,19 @@
                 </tr>
                 <tr class="expandable-content">
                     <td colspan="1">
-                        <p>Format must be JSON</p>
+                        <p>
+                            Website urls split by ,
+                            e.g
+                            github.com test.com
+
+                            Also supports partial names like
+                            github hub
+
+                            This will stop the extension running on anything that has 'github' or 'hub' in the url
+                        </p>
                         <textarea id="websiteConfigTextArea"></textarea>
                         <br />
-                        <button id="saveWebsiteConfig">Save Changes</button>
+                        <button id="saveWebsiteConfigButton">Save Changes</button>
                     </td>
                 </tr>
                 <tr class="expandable-row">
@@ -76,7 +85,7 @@
                         <textarea id="searchListTextArea"></textarea>
                         <br />
                         <button id="saveSearchListButton">Save Changes</button>
-                        <button id="resetToDefault">
+                        <button id="resetToDefaultSearchList">
                             Reset emoji list to default
                         </button>
                     </td>
