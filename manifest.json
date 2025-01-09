@@ -4,7 +4,7 @@
   "description": "Easily search emojis/phrases/words with a simple menu. To use, go to any input box and type ':'",
   "version": "1.0",
   "action": {
-    "default_popup": "html/search.html",
+    "default_popup": "html/extension.html",
     "default_icon": "images/icon-16.png"
   },
   "icons": {
@@ -14,9 +14,9 @@
     {
       "js": [
         "scripts/startup.js",
-        "scripts/content.js",
-        "scripts/search.js",
-        "scripts/emojis.js",
+        "scripts/searchMenuLogic.js",
+        "scripts/searchMenuElement.js",
+        "scripts/initSearchList.js",
         "scripts/util.js"
       ],
       "matches": ["http://*/*", "https://*/*"],
@@ -25,7 +25,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["emojis.json"],
+      "resources": ["default-search-list.json"],
       "matches": ["<all_urls>"],
       "extension_ids": []
     }

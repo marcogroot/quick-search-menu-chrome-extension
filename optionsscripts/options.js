@@ -1,27 +1,27 @@
-async function loadJsonEmojisFallBack() {
-  console.log("Fallback to default emojis");
-  const url = chrome.runtime.getURL("emojis.json");
+async function loadSearchListFallback() {
+  console.log("Fallback to default search list");
+  const url = chrome.runtime.getURL("default-search-list.json");
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    let defaultEmojis = await response.json();
-    return Object.entries(defaultEmojis);
+    let defaultSearchList = await response.json();
+    return Object.entries(defaultSearchList);
   } catch (error) {
-    console.error("Error fetching emojis:", error);
+    console.error("Error fetching search list:", error);
   }
 }
 
-async function populateCurrentEmojiList() {
-  await chrome.storage.local.get("emojis", async function (data) {
+async function populateCurrentSearchList() {
+  await chrome.storage.local.get("searchList", async function (data) {
     if (chrome.runtime.lastError) {
       console.error("Error getting storage:", chrome.runtime.lastError);
     } else {
-      let emojis = null;
-      emojis = data.emojis ?? (await loadJsonEmojisFallBack());
+      let searchList = null;
+      searchList = data.searchList ?? (await loadSearchListFallback());
 
-      const jsonEditor = document.getElementById("json-editor");
+      const jsonEditor = document.getElementById("searchListTextArea");
       jsonEditor.style.cssText = `
       width: 500px;
       height: 300px;
@@ -31,18 +31,32 @@ async function populateCurrentEmojiList() {
       white-space: pre-wrap;
       overflow: auto;
     `;
-      jsonEditor.value = formatEmojiStringToJson(emojis);
+      jsonEditor.value = formatSearchListToJson(searchList);
     }
   });
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  const saveEmojiListButton = document.getElementById("saveEmojisButton");
-  saveEmojiListButton.addEventListener("click", () => {
-    setEmojiData();
-    populateCurrentEmojiList();
+  // quickSearchListSettings
+  const saveSearchListButton = document.getElementById("saveSearchListButton");
+  saveSearchListButton.addEventListener("click", () => {
+    setSaveListData();
+    populateCurrentSearchList();
   });
 
+  const resetToDefaultSearchListButton =
+    document.getElementById("resetToDefault");
+  resetToDefaultSearchListButton.addEventListener("click", () => {
+    const confirmation = confirm(
+      "Are you sure you want to reset search list to default?",
+    );
+    if (confirmation) {
+      resetConfigToDefault("searchList");
+      populateCurrentSearchList();
+    }
+  });
+
+  // general settings
   const saveSearchSymbolButton = document.getElementById(
     "saveSearchSymbolButon",
   );
@@ -64,18 +78,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     searchSymbolInputBox.value = ":";
   });
 
-  const resetToDefaultEmojisButton = document.getElementById("resetToDefault");
-  resetToDefaultEmojisButton.addEventListener("click", () => {
-    const confirmation = confirm(
-      "Are you sure you want to reset emoji list to default?",
-    );
-    if (confirmation) {
-      resetConfigToDefault("emojis");
-      populateCurrentEmojiList();
-    }
-  });
-
-  populateCurrentEmojiList();
+  populateCurrentSearchList();
 
   const expandableRows = document.querySelectorAll(".expandable-row");
 
@@ -122,20 +125,20 @@ function setSearchSymbol() {
   });
 }
 
-function setEmojiData() {
-  const jsonEditor = document.getElementById("json-editor");
+function setSaveListData() {
+  const jsonEditor = document.getElementById("searchListTextArea");
   const editedJsonString = jsonEditor.value;
-  const editedJson = parseJson(editedJsonString);
+  const editedJson = validateJson(editedJsonString);
   if (editedJson) {
     console.log("Saving JSON:", editedJson);
-    chrome.storage.local.set({ emojis: editedJson }, function () {
+    chrome.storage.local.set({ searchList: editedJson }, function () {
       if (chrome.runtime.lastError) {
         console.error("Error setting storage:", chrome.runtime.lastError);
         alert("There was an error updating the new list, please try again");
       } else {
       }
     });
-    alert("Successfully updated emoji list!");
+    alert("Successfully updated search list!");
   } else {
     alert(
       "invalid format, please update the format and try again. \n If you need help try use an online json formatter",
@@ -144,22 +147,22 @@ function setEmojiData() {
   }
 }
 
-function formatEmojiStringToJson(data) {
+function formatSearchListToJson(data) {
   try {
-    const emojiObject = {};
+    const searchResultsArray = {};
 
     data.forEach((row, index) => {
-      emojiObject[row[0]] = row[1];
+      searchResultsArray[row[0]] = row[1];
     });
 
-    return JSON.stringify(emojiObject, null, 2);
+    return JSON.stringify(searchResultsArray, null, 2);
   } catch (error) {
     console.error("Error formatting JSON:", error);
     return "{}";
   }
 }
 
-function parseJson(jsonString) {
+function validateJson(jsonString) {
   try {
     let jsonData = JSON.parse(jsonString);
     return Object.entries(jsonData);
@@ -167,4 +170,48 @@ function parseJson(jsonString) {
     console.log("error parsing json", error);
     return null;
   }
+}
+
+function setWebsiteConfig() {
+  const textArea = document.getElementById("websiteConfigTextArea");
+  const editedJsonString = textArea.value;
+  const editedJson = validateJson(editedJsonString);
+  if (editedJson) {
+    console.log("Saving JSON:", editedJson);
+    chrome.storage.local.set({ websiteConfig: editedJson }, function () {
+      if (chrome.runtime.lastError) {
+        console.error("Error setting storage:", chrome.runtime.lastError);
+        alert("There was an error updating the new list, please try again");
+      } else {
+      }
+    });
+    alert("Successfully updated website config list!");
+  } else {
+    alert(
+      "invalid format, please update the format and try again. \n If you need help try use an online json formatter",
+    );
+    return;
+  }
+}
+
+async function populateCurrentWebsiteConfig() {
+  await chrome.storage.local.get("websiteConfig", async function (data) {
+    if (chrome.runtime.lastError) {
+      console.error("Error getting storage:", chrome.runtime.lastError);
+    } else {
+      let websiteConfigJson = data.websiteConfig ?? "{[]}";
+
+      const jsonEditor = document.getElementById("websiteConfigTextArea");
+      jsonEditor.style.cssText = `
+      width: 500px;
+      height: 300px;
+      border: 1px solid #ccc;
+      font-family: monospace;
+      padding: 5px;
+      white-space: pre-wrap;
+      overflow: auto;
+    `;
+      jsonEditor.value = JSON.stringify(websiteConfigJson, null, 2);
+    }
+  });
 }
