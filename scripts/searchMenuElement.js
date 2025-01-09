@@ -67,6 +67,16 @@ function createToolTipElement() {
   return toolTip;
 }
 
+function createArrowKeysDisabledToolTipElement() {
+  let arrowKeyControlToolTip = document.createElement("div");
+  arrowKeyControlToolTip.style.backgroundColor = "#C0C0C0";
+  arrowKeyControlToolTip.style.border = "1px solid #ddd";
+  arrowKeyControlToolTip.innerText =
+    "Arrow key controls are disabled on this website due to incompatability";
+  arrowKeyControlToolTip.id = "arrowKeyControlTooltip";
+  return arrowKeyControlToolTip;
+}
+
 function createlistItemElement(searchResultName, searchResult) {
   let truncatedSearchResultName = searchResultName;
   if (searchResultName.length >= 25) {

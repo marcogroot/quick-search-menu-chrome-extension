@@ -66,6 +66,7 @@ function runSearchList(inputs, contentEditableBoxes) {
       });
     }
     currentInput.setAttribute("searchMenuApplied", "true");
+    currentInput.setAttribute("isContentEditableTextField", "true");
   });
 }
 
@@ -151,6 +152,10 @@ function createSearchMenu() {
     searchText,
     highlightedSearchResultIndex,
   );
+
+  if (focusedInputBox.hasAttribute("isContentEditableTextField")) {
+    newSearchMenu.appendChild(createArrowKeysDisabledToolTipElement());
+  }
 
   newSearchMenu.addEventListener("keydown", function (e) {
     if (!searchMenuIsUp) return;
