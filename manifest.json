@@ -33,6 +33,6 @@
       "extension_ids": []
     }
   ],
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": ["scripting", "storage"],
   "options_page": "html/options.html"
 }
