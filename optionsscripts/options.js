@@ -4,7 +4,7 @@ async function populateWebsiteConfig() {
       console.error("Error getting storage:", chrome.runtime.lastError);
     } else {
       let websiteConfigText =
-        data.websiteConfig ?? "testingtesting123.com testingtesting1234.com";
+        data.websiteConfig ?? ["examplewebsitse12312.com", "examplewebsite123123.com"];
 
       const textAreaHtml = document.getElementById("websiteConfigTextArea");
       textAreaHtml.style.cssText = `
