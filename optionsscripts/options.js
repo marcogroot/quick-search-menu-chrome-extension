@@ -44,7 +44,6 @@ async function populateSearchList() {
 }
 
 async function loadSearchListFallback() {
-  console.log("Fallback to default search list");
   const url = chrome.runtime.getURL("default-search-list.json");
   try {
     const response = await fetch(url);
@@ -204,7 +203,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       .split(/[\s\n]+/)
       .filter((word) => word !== "" && word !== "\n");
 
-    console.log("New text is ", disabledWebsites);
     chrome.storage.local.set({ websiteConfig: disabledWebsites }, function () {
       if (chrome.runtime.lastError) {
         console.error("Error setting storage:", chrome.runtime.lastError);
@@ -223,7 +221,6 @@ document.addEventListener("DOMContentLoaded", async function () {
       let jsonData = JSON.parse(jsonString);
       return Object.entries(jsonData);
     } catch (error) {
-      console.log("error parsing json", error);
       return null;
     }
   }
