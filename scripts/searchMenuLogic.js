@@ -17,7 +17,7 @@ chrome.storage.local.get("searchSymbol", function (data) {
 
 function runSearchList(inputs, contentEditableBoxes) {
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
+    if (e.key === "Escape" || e.key === "Enter") {
       closeSearchMenu();
     }
   });
@@ -48,9 +48,9 @@ function runSearchList(inputs, contentEditableBoxes) {
   // react text boxes
   contentEditableBoxes.forEach((currentInput) => {
     if (!currentInput.hasAttribute("searchMenuApplied")) {
-      // currentInput.addEventListener("keydown", function (e) {
-      //   handleInputKeydownEvents(e, currentInput);
-      // });
+      currentInput.addEventListener("keydown", function (e) {
+        handleInputKeydownEvents(e, currentInput);
+      });
       currentInput.addEventListener("focus", function (e) {
         if (currentInput != focusedInputBox) {
           closeSearchMenu();
@@ -60,7 +60,7 @@ function runSearchList(inputs, contentEditableBoxes) {
         handleInputText(
           e.target.textContent,
           e.data,
-          getSelectionInfo(),
+          getCursorPosition(),
           currentInput,
         );
       });
@@ -105,6 +105,10 @@ function handleInputKeydownEvents(e, currentInput) {
 }
 
 function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
+  console.log(searchSymbolIndex, selectionStart);
+  console.log(textContent);
+  console.log(textContent[searchSymbolIndex], textContent[selectionStart - 1]);
+  console.log("Test1");
   focusedInputBox = currentInput;
 
   // if there is no menu
@@ -141,6 +145,7 @@ function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
 
   // Else they are currently searching
   searchText = textContent.substring(searchSymbolIndex + 1, selectionStart);
+  console.log(searchText);
   setSearchIndex(0);
   let newSearchMenu = createSearchMenu();
   existingMenu = newSearchMenu;
@@ -234,46 +239,51 @@ function handleEmojjiInsertionWithEnter(e) {
 }
 
 function handleSearchResultInsertion(searchedResult, insertedWithColon) {
-  let currentText = focusedInputBox.value;
-  let isContentEditableDiv = false;
-  if (!currentText) {
-    isContentEditableDiv = true;
-    currentText = focusedInputBox.textContent;
-  }
+  try {
+    let currentText = focusedInputBox.value;
+    let isContentEditableDiv = false;
+    if (!currentText) {
+      isContentEditableDiv = true;
+      currentText = focusedInputBox.textContent;
+    }
 
-  if (isContentEditableDiv) {
+    if (isContentEditableDiv) {
+      focusedInputBox.focus();
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0); // Get the current range
+
+      let newStart = range.startOffset;
+      newStart = searchSymbolIndex;
+      range.setStart(range.startContainer, newStart);
+      range.setEnd(range.startContainer, newStart + searchText.length + 1);
+      range.deleteContents();
+
+      document.execCommand("insertText", false, searchedResult);
+    } else {
+      let left = currentText.substr(0, searchSymbolIndex);
+      if (searchSymbolIndex === 0) {
+        left = "";
+      }
+      let rigth_start_index = searchSymbolIndex + 1;
+      if (insertedWithColon) {
+        rigth_start_index += 1;
+      }
+      let right = currentText.substr(rigth_start_index + searchText.length);
+      const newText = left + searchedResult + right;
+      focusedInputBox.value = newText;
+      focusedInputBox.setSelectionRange(
+        searchSymbolIndex + searchedResult.length,
+        searchSymbolIndex + searchedResult.length,
+      );
+    }
     focusedInputBox.focus();
-    const selection = window.getSelection();
-    const range = selection.getRangeAt(0); // Get the current range
-
-    let newStart = range.startOffset;
-    newStart = searchSymbolIndex;
-    range.setStart(range.startContainer, newStart);
-    range.setEnd(range.startContainer, newStart + searchText.length + 1);
-    range.deleteContents();
-
-    document.execCommand("insertText", false, searchedResult);
-  } else {
-    let left = currentText.substr(0, searchSymbolIndex);
-    if (searchSymbolIndex === 0) {
-      left = "";
-    }
-    let rigth_start_index = searchSymbolIndex + 1;
-    if (insertedWithColon) {
-      rigth_start_index += 1;
-    }
-    let right = currentText.substr(rigth_start_index + searchText.length);
-    const newText = left + searchedResult + right;
-    focusedInputBox.value = newText;
-    focusedInputBox.setSelectionRange(
-      searchSymbolIndex + searchedResult.length,
-      searchSymbolIndex + searchedResult.length,
-    );
+    closeSearchMenu();
+    return;
+  } catch (exception) {
+    focusedInputBox.focus();
+    closeSearchMenu();
+    return;
   }
-
-  focusedInputBox.focus();
-  closeSearchMenu();
-  return;
 }
 
 function addMouseControls() {
@@ -294,7 +304,7 @@ function addMouseControls() {
   });
 }
 
-function getSelectionInfo() {
+function getCursorPosition() {
   const selection = window.getSelection();
 
   if (selection.rangeCount > 0) {

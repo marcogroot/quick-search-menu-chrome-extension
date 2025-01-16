@@ -52,12 +52,7 @@ async function main() {
 
   const observer = new MutationObserver((mutations) => {
     if (window.location.href !== currentUrl) {
-      console.log(
-        "URL changed (MutationObserver) from",
-        currentUrl,
-        "to",
-        window.location.href,
-      );
+      closeSearchMenu();
       currentUrl = window.location.href;
       startExtensionWithDelay(10);
       startExtensionWithDelay(1000);

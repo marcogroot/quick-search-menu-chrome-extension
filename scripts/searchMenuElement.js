@@ -72,7 +72,7 @@ function createArrowKeysDisabledToolTipElement() {
   arrowKeyControlToolTip.style.backgroundColor = "#C0C0C0";
   arrowKeyControlToolTip.style.border = "1px solid #ddd";
   arrowKeyControlToolTip.innerText =
-    "Arrow key controls are disabled on this website due to incompatability";
+    "Search may have issues on this website. Recommend using mouse to select";
   arrowKeyControlToolTip.id = "arrowKeyControlTooltip";
   return arrowKeyControlToolTip;
 }
