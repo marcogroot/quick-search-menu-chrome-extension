@@ -105,10 +105,6 @@ function handleInputKeydownEvents(e, currentInput) {
 }
 
 function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
-  console.log(searchSymbolIndex, selectionStart);
-  console.log(textContent);
-  console.log(textContent[searchSymbolIndex], textContent[selectionStart - 1]);
-  console.log("Test1");
   focusedInputBox = currentInput;
 
   // if there is no menu
@@ -145,7 +141,6 @@ function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
 
   // Else they are currently searching
   searchText = textContent.substring(searchSymbolIndex + 1, selectionStart);
-  console.log(searchText);
   setSearchIndex(0);
   let newSearchMenu = createSearchMenu();
   existingMenu = newSearchMenu;
