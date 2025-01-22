@@ -220,8 +220,6 @@ function handleEmojjiInsertionWithClick() {
 
 function handleEmojjiInsertionWithEnter(e) {
   
-    console.log("Case when hitting enter and the emoji search menu is up");
-
     e.preventDefault();
     e.stopImmediatePropagation()
     
