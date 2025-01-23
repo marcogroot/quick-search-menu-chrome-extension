@@ -219,18 +219,22 @@ function handleEmojjiInsertionWithClick() {
 }
 
 function handleEmojjiInsertionWithEnter(e) {
-  e.preventDefault();
-  let searchResults = document.getElementsByClassName("searchResultRow");
-  if (searchResults == null || searchResults.length === 0) {
-    closeSearchMenu();
-    return;
-  }
-  const searchedResult = getSearchResult(
-    searchText,
-    highlightedSearchResultIndex,
-  );
+  
+    e.preventDefault();
+    e.stopImmediatePropagation()
+    
+    let searchResults = document.getElementsByClassName("searchResultRow");
+    if (searchResults == null || searchResults.length === 0) {
+      closeSearchMenu();
+      return;
+    }
+    
+    const searchedResult = getSearchResult(
+      searchText,
+      highlightedSearchResultIndex,
+    );
 
-  handleSearchResultInsertion(searchedResult, false);
+    handleSearchResultInsertion(searchedResult, false);  
 }
 
 function handleSearchResultInsertion(searchedResult, insertedWithColon) {
