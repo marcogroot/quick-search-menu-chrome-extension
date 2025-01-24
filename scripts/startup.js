@@ -17,7 +17,7 @@ function startExtensionWithDelay(delay) {
     searchBoxes = Array.from(document.getElementsByTagName("search"));
     textAreas = Array.from(document.getElementsByTagName("textarea"));
 
-    console.log("Started");
+    // console.log("Started");
     runSearchList(inputs.concat(searchBoxes, textAreas), contentEditableInputs);
   }, delay);
 }
@@ -44,11 +44,11 @@ async function main() {
   }
 
   // Some pages take a bit to load in all the input boxes, retry on adding event listeners
-  startExtensionWithDelay(10);
+  // startExtensionWithDelay(10);
   startExtensionWithDelay(1000);
-  startExtensionWithDelay(3000);
-  startExtensionWithDelay(5000);
-  startExtensionWithDelay(10000);
+  // startExtensionWithDelay(3000);
+  // startExtensionWithDelay(5000);
+  // startExtensionWithDelay(10000);
 
   const observer = new MutationObserver((mutations) => {
     if (window.location.href !== currentUrl) {

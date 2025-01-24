@@ -4,6 +4,7 @@ let searchMenuIsUp = false;
 let highlightedSearchResultIndex = 0;
 let focusedInputBox;
 let searchText = "";
+let semiColonBool = false
 
 chrome.storage.local.get("searchSymbol", function (data) {
   if (chrome.runtime.lastError) {
@@ -16,8 +17,10 @@ chrome.storage.local.get("searchSymbol", function (data) {
 });
 
 function runSearchList(inputs, contentEditableBoxes) {
+  console.log(contentEditableBoxes)
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" || e.key === "Enter") {
+      console.log("Esc or Exit")
       closeSearchMenu();
     }
   });
@@ -26,14 +29,17 @@ function runSearchList(inputs, contentEditableBoxes) {
   inputs.forEach((currentInput) => {
     if (!currentInput.hasAttribute("searchMenuApplied")) {
       currentInput.addEventListener("keydown", function (e) {
+        console.log("Keydown event")
         handleInputKeydownEvents(e, currentInput);
       });
       currentInput.addEventListener("focus", function (e) {
+        console.log("Focus event")
         if (currentInput != focusedInputBox) {
           closeSearchMenu();
         }
       });
       currentInput.addEventListener("input", function (e) {
+        console.log("Input event")
         handleInputText(
           e.target.value,
           e.data,
@@ -43,20 +49,37 @@ function runSearchList(inputs, contentEditableBoxes) {
       });
     }
     currentInput.setAttribute("searchMenuApplied", "true");
+
   });
 
   // react text boxes
   contentEditableBoxes.forEach((currentInput) => {
     if (!currentInput.hasAttribute("searchMenuApplied")) {
       currentInput.addEventListener("keydown", function (e) {
-        handleInputKeydownEvents(e, currentInput);
+        console.log("Keydown event");
+        if (e.key === ":") {
+          console.log("Semicolon pressed in React field");
+          handleInputText(
+            currentInput.textContent,
+            e.key, // Pass the semicolon as the last typed character
+            getCursorPosition(),
+            currentInput,
+          );
+        } else if (searchMenuIsUp) {
+          handleInputKeydownEvents(e, currentInput)
+        }
       });
+
       currentInput.addEventListener("focus", function (e) {
         if (currentInput != focusedInputBox) {
+          console.log("Focus event")
           closeSearchMenu();
         }
       });
+
       currentInput.addEventListener("input", (e) => {
+        // console.log(e.target.textContent)
+        console.log("Input event")
         handleInputText(
           e.target.textContent,
           e.data,
@@ -104,8 +127,26 @@ function handleInputKeydownEvents(e, currentInput) {
   }
 }
 
+// function runEmojiFunction(e) {
+//   let currentText
+
+//   // Get the text and caret position based on the input type
+//   if (e.target.isContentEditable) {
+//     currentText = e.target.textContent;
+//   } else {
+//     console.error("Unhandled input type");
+//     return;
+//   }
+
+//   // Call handleInputText with the extracted context
+//   handleInputText(currentText, ":", getCursorPosition(), e.target);
+// }
+
+
 function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
   focusedInputBox = currentInput;
+
+  selectionStart = getCursorPosition()
 
   // if there is no menu
   // They typed a search symbols -> open search menu
