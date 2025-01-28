@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Quick Search Menu",
   "description": "Easily search emojis/phrases/words with a simple menu. To use, go to any input box and type ':'",
-  "version": "1.0",
+  "version": "1.1",
   "action": {
     "default_popup": "html/extension.html",
     "default_icon": "images/icon-16.png"
