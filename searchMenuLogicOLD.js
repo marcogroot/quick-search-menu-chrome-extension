@@ -1,71 +1,67 @@
-// Global variables
 let searchSymbol = ":";
 let searchSymbolIndex = -1;
 let searchMenuIsUp = false;
 let highlightedSearchResultIndex = 0;
 let focusedInputBox;
 let searchText = "";
-let listenForSearch = false;
 
-// Retrieve custom search symbol from storage if available.
 chrome.storage.local.get("searchSymbol", function (data) {
   if (chrome.runtime.lastError) {
     console.error("Error getting storage:", chrome.runtime.lastError);
-  } else if (data.searchSymbol) {
-    searchSymbol = data.searchSymbol;
+  } else {
+    if (data.searchSymbol) {
+      searchSymbol = data.searchSymbol;
+    }
   }
 });
 
-// Run search list on both HTML inputs and React contentEditable boxes.
 function runSearchList(inputs, contentEditableBoxes) {
-  // Global listener to close the menu on Escape or Enter
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" || e.key === "Enter") {
-      console.log("Esc or Enter pressed globally");
       closeSearchMenu();
     }
   });
 
-  // React contentEditable text boxes
-  contentEditableBoxes.forEach((currentInput) => {
+  // html input boxes
+  inputs.forEach((currentInput) => {
     if (!currentInput.hasAttribute("searchMenuApplied")) {
       currentInput.addEventListener("keydown", function (e) {
-        console.log("Keydown event");
-
-        if (e.key === searchSymbol) {
-          const cursorPos = getCursorPosition();
-          const text = currentInput.textContent;
-
-          if (cursorPos == 0 || text[cursorPos - 1] == " ") {
-            // semicolon as first character
-            console.log("Script is listening for emoji name");
-            handleInputText(
-              e.target.textContent,
-              ":",
-              getCursorPosition(),
-              currentInput
-            );
-          }
-          return;
-        } else if (searchMenuIsUp) {
-          handleInputKeydownEvents(e, currentInput);
-        } 
+        handleInputKeydownEvents(e, currentInput);
       });
-
-      currentInput.addEventListener("focus", function () {
-        console.log("Focus event");
-        if (currentInput !== focusedInputBox) {
+      currentInput.addEventListener("focus", function (e) {
+        if (currentInput != focusedInputBox) {
           closeSearchMenu();
         }
       });
+      currentInput.addEventListener("input", function (e) {
+        handleInputText(
+          e.target.value,
+          e.data,
+          currentInput.selectionStart,
+          currentInput,
+        );
+      });
+    }
+    currentInput.setAttribute("searchMenuApplied", "true");
+  });
 
+  // react text boxes
+  contentEditableBoxes.forEach((currentInput) => {
+    if (!currentInput.hasAttribute("searchMenuApplied")) {
+      currentInput.addEventListener("keydown", function (e) {
+        handleInputKeydownEvents(e, currentInput);
+      });
+      currentInput.addEventListener("focus", function (e) {
+        if (currentInput != focusedInputBox) {
+          closeSearchMenu();
+        }
+      });
       currentInput.addEventListener("input", (e) => {
-        console.log("Input event");
         handleInputText(
           e.target.textContent,
           e.data,
           getCursorPosition(),
-          currentInput
+          currentInput,
         );
       });
     }
@@ -74,21 +70,23 @@ function runSearchList(inputs, contentEditableBoxes) {
   });
 }
 
-// Adjusted function to set the highlighted search result index.
 function setSearchIndex(newIndex) {
-  const searchResults = document.getElementsByClassName("searchResultRow");
-  const searchSize = searchResults.length;
+  let searchResults = document.getElementsByClassName("searchResultRow");
+  let searchSize = searchResults.length;
+
   highlightedSearchResultIndex = Math.min(searchSize - 1, newIndex);
   highlightedSearchResultIndex = Math.max(0, highlightedSearchResultIndex);
 
-  for (let index = 0; index < searchSize; ++index) {
+  for (index = 0; index < searchSize; ++index) {
     let listItem = searchResults[index];
-    listItem.style.backgroundColor =
-      index === highlightedSearchResultIndex ? "lavender" : "#f2f2f2";
+    if (index === highlightedSearchResultIndex) {
+      listItem.style.backgroundColor = "lavender";
+    } else {
+      listItem.style.backgroundColor = "#f2f2f2";
+    }
   }
 }
 
-// Handle key events when the emoji menu is up.
 function handleInputKeydownEvents(e, currentInput) {
   if (!searchMenuIsUp) return;
   if (e.key === "ArrowDown") {
@@ -106,45 +104,46 @@ function handleInputKeydownEvents(e, currentInput) {
   }
 }
 
-// Unified input handling for both HTML inputs and contentEditable divs.
 function handleInputText(textContent, lastTyped, selectionStart, currentInput) {
-  console.log("Handling Input Text")
   focusedInputBox = currentInput;
-  // Update selectionStart in case it changed (for contentEditable fields)
-  selectionStart = getCursorPosition();
 
-  // If there is no active trigger, only process if the last typed character is the search symbol.
+  // if there is no menu
+  // They typed a search symbols -> open search menu
+  // else -> exit out
   if (searchSymbolIndex == -1) {
-    if (lastTyped !== searchSymbol) return;
-    // Set the trigger and wait for another character to be typed.
+    if (lastTyped != searchSymbol) return;
     searchSymbolIndex = selectionStart - 1;
-    createSearchMenu();
+    createSearchMenu(currentInput, "");
     return;
   }
-
-  // If the character at searchSymbolIndex is no longer our search symbol, cancel the trigger.
-  if (textContent[searchSymbolIndex] !== searchSymbol) {
-    console.log("Closed search menu");
+  // close menu if you start typing somewhere else;
+  if (textContent[searchSymbolIndex] != searchSymbol) {
     closeSearchMenu();
     return;
   }
 
-  // If the user types a space (indicating the end of the search term), close the menu.
-  if (lastTyped === " ") {
-    console.log("Closed search menu");
+  // if they type two search symbols, if there is only 1 result then insert it, otherwise close
+  if (lastTyped == searchSymbol) {
+    let exactSearchResult = searchExactResult(searchText);
+    if (exactSearchResult != null) {
+      handleSearchResultInsertion(exactSearchResult, true);
+    } else {
+      closeSearchMenu();
+    }
+    return;
+  }
+
+  // If the user types colon followed by a space, just close the menu
+  if (lastTyped == " " && selectionStart - 2 == searchSymbolIndex) {
     closeSearchMenu();
     return;
   }
 
-  // Update the searchText from the position immediately after the colon to the current cursor.
+  // Else they are currently searching
   searchText = textContent.substring(searchSymbolIndex + 1, selectionStart);
   setSearchIndex(0);
-  const newSearchMenu = createSearchMenu();
+  let newSearchMenu = createSearchMenu();
   existingMenu = newSearchMenu;
-
-  // // Only display the menu if there's at least one character after the colon.
-  // if (searchText.length > 0) {
-  // }
 }
 
 function createSearchMenu() {
